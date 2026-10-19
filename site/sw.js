@@ -1,5 +1,5 @@
 // Bump before every deploy, otherwise installed phones keep the old cache.
-const VERSION = 'crossfarm-v4.1';
+const VERSION = 'crossfarm-v4.2';
 const ASSETS = [
   './', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/api.js', './js/engine.js', './js/crops.js', './js/community.js', './js/analogues.js', './js/net.js',

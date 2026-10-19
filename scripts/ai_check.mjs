@@ -60,6 +60,28 @@ console.log('chat');
   globalThis.fetch = async (url, init) => { sent = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ message: { content: 'k' } }], usage: { total_tokens: 9 } })); };
   const capped = await chat({ ...ENV, AI_MAX_TOKENS: '50' }, fakeDb(), 'ip', { ...MSG('y'), max_tokens: 5000 });
   ok(capped.message && sent?.max_tokens === 50, `max_tokens clamped to AI_MAX_TOKENS (sent ${sent?.max_tokens})`);
+  const xdb = fakeDb();
+  await chat(ENV, xdb, 'ip', { ...MSG('z'), extra: { chat_template_kwargs: { enable_thinking: false } } });
+  ok(sent?.chat_template_kwargs?.enable_thinking === false, 'extra request fields reach the provider');
+  sent = null;
+  await chat(ENV, xdb, 'ip', MSG('z'));
+  ok(sent !== null, 'a call without the extra fields is not served from the other call\'s cache');
+}
+
+console.log('translate');
+{
+  const { onRequestPost } = await import('../functions/api/translate.js');
+  const TENV = { ...ENV, IP_SALT: 'salt' };
+  const req = (text) => new Request('https://x.test/api/translate', { method: 'POST', headers: { 'content-type': 'application/json', 'CF-Connecting-IP': '10.9.9.9' }, body: JSON.stringify({ text, to: 'de' }) });
+  let sent;
+  globalThis.fetch = async (url, init) => { sent = JSON.parse(init.body); return new Response(JSON.stringify({ choices: [{ finish_reason: 'length', message: { content: '' } }], usage: { total_tokens: 100 } })); };
+  const empty = await (await onRequestPost({ request: req('When did you start irrigating?'), env: { ...TENV, DB: fakeDb() } })).json();
+  ok(empty.paused && !('text' in empty), `empty model output is reported as unavailable, never as an empty translation (got ${JSON.stringify(empty)})`);
+  ok(sent?.chat_template_kwargs?.enable_thinking === false, 'translation asks the model not to reason first');
+  ok(sent?.max_tokens >= 200, `translation leaves room for the answer (max_tokens ${sent?.max_tokens})`);
+  globalThis.fetch = async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: 'Wann habt ihr angefangen zu bewässern?' } }], usage: { total_tokens: 40 } }));
+  const good = await (await onRequestPost({ request: req('When did you start irrigating?'), env: { ...TENV, DB: fakeDb() } })).json();
+  ok(good.text === 'Wann habt ihr angefangen zu bewässern?', 'a real translation comes back as text');
 }
 
 console.log('grounding');

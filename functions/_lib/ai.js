@@ -6,12 +6,13 @@ import { sha } from './http.js';
 // Provider answers that mean the request was refused before any generation (not billed)
 const REJECTED = new Set([400, 401, 403, 404, 422, 429]);
 
-export async function chat(env, db, ip, { model, messages, tools, tool_choice, max_tokens = 400, timeoutMs = 25000 }) {
+// extra: further request fields for the provider (e.g. chat_template_kwargs); part of the cache key
+export async function chat(env, db, ip, { model, messages, tools, tool_choice, max_tokens = 400, timeoutMs = 25000, extra = null }) {
   if (env.AI_ENABLED !== '1') return { paused: 'off' };
   const mock = env.AI_MOCK === '1';
   const maxTokens = Math.min(max_tokens, cap(env.AI_MAX_TOKENS) || 1);
   const m = model || env.AI_MODEL;
-  const key = await sha(JSON.stringify([m, messages, tools || null, tool_choice || null, maxTokens]));
+  const key = await sha(JSON.stringify([m, messages, tools || null, tool_choice || null, maxTokens, extra]));
   if (!mock) {
     const hit = await db.prepare('SELECT body FROM cache WHERE k = ?').bind(key).first();
     if (hit) return { ...JSON.parse(hit.body), cached: true };
@@ -23,7 +24,7 @@ export async function chat(env, db, ip, { model, messages, tools, tool_choice, m
 
   let out;
   try {
-    out = mock ? fake(messages, tools, tool_choice) : await call(env, m, messages, tools, tool_choice, maxTokens, timeoutMs);
+    out = mock ? fake(messages, tools, tool_choice) : await call(env, m, messages, tools, tool_choice, maxTokens, timeoutMs, extra);
   } catch (e) {
     // Refused up front: release. Timeout, 5xx, broken reply: it may have been billed, keep it booked.
     await g.settle(e.rejected ? 0 : est);
@@ -42,7 +43,7 @@ export async function chat(env, db, ip, { model, messages, tools, tool_choice, m
   return { ...res, cached: false };
 }
 
-async function call(env, model, messages, tools, tool_choice, maxTokens, timeoutMs) {
+async function call(env, model, messages, tools, tool_choice, maxTokens, timeoutMs, extra) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), Math.max(1000, timeoutMs));
   try {
@@ -50,7 +51,7 @@ async function call(env, model, messages, tools, tool_choice, maxTokens, timeout
       method: 'POST',
       signal: ctl.signal,
       headers: { authorization: `Bearer ${env.NEBIUS_API_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ model, messages, tools, tool_choice, max_tokens: maxTokens, temperature: 0.2 }),
+      body: JSON.stringify({ ...(extra || {}), model, messages, tools, tool_choice, max_tokens: maxTokens, temperature: 0.2 }),
     });
     if (!r.ok) throw Object.assign(new Error(`provider ${r.status}`), { rejected: REJECTED.has(r.status) });
     return await r.json();

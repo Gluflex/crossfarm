@@ -934,7 +934,7 @@ async function translateIn(btn, texts) {
   btn.innerHTML = `${ph('circle-notch')}Translating`;
   try {
     const out = await Promise.all(els.map((el, i) => community.translate(texts[keys[i]], uiLang())));
-    if (out.some((o) => o.paused)) throw new Error('paused');
+    if (out.some((o) => o.paused || !String(o.text || '').trim())) throw new Error('paused');  // keep the original over a blank
     els.forEach((el, i) => (el.textContent = out[i].text));
     btn.dataset.shown = '1';
     btn.innerHTML = `${ph('translate')}Show original`;
