@@ -1202,6 +1202,8 @@ function openMethod() {
         <li>Haarsma et al. 2016, HighResMIP, Geoscientific Model Development 9:4185</li>
         <li>IPCC 2021, AR6 WG1 Summary for Policymakers</li>
       </ul>
+      <h3>Source code</h3>
+      <p>Open source under the GNU AGPL-3.0: <a href="https://github.com/Gluflex/crossfarm" target="_blank" rel="noopener">github.com/Gluflex/crossfarm</a></p>
     </div>`);
 }
 

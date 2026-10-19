@@ -280,6 +280,9 @@ SoilGrids allows 5 requests per minute.
 
 ## Licence and data
 
+Source: https://github.com/Gluflex/crossfarm. Live app:
+https://crossfarm.pages.dev.
+
 Code: GNU AGPL-3.0 (`LICENSE`), copyright Leandro Catarci and the Crossfarm
 hackathon team. Anyone may use, change and share it; whoever runs a modified
 version as an online service must offer its full source under the same
