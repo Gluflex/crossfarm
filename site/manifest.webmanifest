@@ -1,0 +1,15 @@
+{
+  "name": "Crossfarm",
+  "short_name": "Crossfarm",
+  "description": "Grow what your land will love tomorrow.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d2a22",
+  "theme_color": "#f3f0e8",
+  "lang": "en",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

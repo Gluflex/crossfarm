@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+.wrangler/
+docs/screens/
+docs/hub-crossfarm.jpg
+scripts/.cache/
+.dev.vars
+.superpowers/
+
+# Private working notes: not part of the public repo
+CLAUDE.md
+docs/superpowers/
+docs/v4-feature-list.md
+docs/professor-brief.md
+docs/research/opportunities/
+docs/research/2026-10-14-eu-calls.md
+scripts/calls.py
+scripts/calls_screen.py
+docs/applications/

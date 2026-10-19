@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crossfarm</title>
+<meta name="theme-color" content="#1b1f1c">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: grid; place-items: center;
+    background: #1b1f1c;
+    font: 13px/1.4 'Archivo', system-ui, sans-serif; color: #8a928c;
+  }
+  body.dev { background: #1e1e1e; /* Figma canvas */ color: #8a8a8a; }
+  .wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  /* iPhone 14/15: screen 390 x 844, 12 px bezel */
+  .phone {
+    position: relative; width: 414px; height: 868px; padding: 12px; box-sizing: border-box;
+    border-radius: 60px; background: #0b0b0c;
+    box-shadow: 0 0 0 2px #3a3a3c, 0 0 0 4px #121214, 0 30px 80px rgba(0,0,0,.6);
+    transform-origin: center;
+  }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 48px; overflow: hidden; background: #eef0ec; }
+  @media (prefers-color-scheme: dark) { .screen { background: #111412; } }
+  iframe { display: block; width: 390px; height: 844px; border: 0; }
+  .island { position: absolute; top: 23px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px;
+    border-radius: 20px; background: #000; z-index: 3; pointer-events: none; }
+  /* status bar + home indicator drawn over the app; colour follows the app's current screen */
+  .status { position: absolute; z-index: 2; top: 12px; left: 12px; right: 12px; height: 54px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 34px 0 46px; font: 600 16px system-ui, -apple-system, sans-serif; color: #161a17;
+    pointer-events: none; transition: color .3s; }
+  .status svg { height: 12px; fill: currentColor; }
+  .status .r { display: flex; gap: 6px; align-items: center; }
+  .home { position: absolute; z-index: 2; bottom: 20px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px;
+    border-radius: 3px; background: #161a17; pointer-events: none; transition: background .3s; }
+  .phone.dark .status { color: #fff; } .phone.dark .home { background: #fff; }
+  a { color: inherit; }
+  .dev-only { display: none; } body.dev .dev-only { display: inline; } body.dev .live-only { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone" id="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span class="r">
+      <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg viewBox="0 0 16 12"><path d="M8 2.4c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .6 10.4 10.4 0 0 0 .8 3.5L2 4.8a8.6 8.6 0 0 1 6-2.4Zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.3-1.3A6.5 6.5 0 0 0 8 4.2 6.5 6.5 0 0 0 3.3 6l1.3 1.3C5.5 6.5 6.7 6 8 6Zm0 3.5c-.6 0-1.2.3-1.6.7L8 11.8l1.6-1.6c-.4-.4-1-.7-1.6-.7Z"/></svg>
+      <svg viewBox="0 0 27 12" style="height:12px"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="19" height="8" rx="1.8"/><rect x="24" y="4" width="1.6" height="4" rx=".8" opacity=".4"/></svg>
+    </span></div>
+    <div class="screen"><iframe id="app" title="Crossfarm" allow="geolocation; fullscreen"></iframe></div>
+    <div class="home"></div>
+  </div>
+  <div>
+    <span class="live-only">Best on your phone: open this page there and add it to your home screen.</span>
+    <span class="dev-only">390 × 844 · <a href="#" id="reload">reload</a> · <a id="open" target="_blank">without frame</a> · <a href="#" id="reset">reset demo</a></span>
+  </div>
+</div>
+<script>
+  // Desktop view of the app: index.html redirects wide screens here.
+  // Locally (localhost) also Figma background, links and live reload.
+  // ?src=other.html shows another page in the frame.
+  const DEV = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  if (DEV) document.body.classList.add('dev');
+
+  const qs = new URLSearchParams(location.search);
+  const custom = qs.get('src');
+  qs.delete('src'); qs.set('frame', '0');   // frame=0: index.html must not redirect back here
+  const src = custom || './?' + qs;
+  const app = document.getElementById('app');
+  const phone = document.getElementById('phone');
+  app.src = src;
+  document.getElementById('open').href = src;
+  document.getElementById('reload').onclick = (e) => { e.preventDefault(); app.src = src; };
+  document.getElementById('reset').onclick = (e) => {
+    e.preventDefault();
+    try { Object.keys(app.contentWindow.localStorage).filter((k) => k === 'cf:farm' || k === 'cf:community').forEach((k) => app.contentWindow.localStorage.removeItem(k)); } catch {}
+    app.src = src;
+  };
+
+  // Light status bar text over satellite imagery (welcome, map picker, scan) and in dark mode
+  setInterval(() => {
+    try {
+      const on = app.contentDocument.querySelector('.screen.on');
+      phone.classList.toggle('dark', !!on && (on.id !== 'main' || matchMedia('(prefers-color-scheme: dark)').matches));
+    } catch {}
+  }, 200);
+
+  // The whole frame scales with the window
+  const fit = () => {
+    const s = Math.min(1, (innerHeight - 60) / 868, (innerWidth - 40) / 414);
+    phone.style.transform = `scale(${s})`;
+    phone.style.margin = `${-(868 * (1 - s)) / 2}px ${-(414 * (1 - s)) / 2}px`;
+  };
+  addEventListener('resize', fit); fit();
+
+  // Live reload (local only): reloads as soon as a watched file is saved
+  if (DEV) {
+    const watch = custom ? [custom] : ['index.html', 'css/app.css', 'js/app.js', 'js/engine.js', 'js/crops.js', 'js/api.js', 'js/community.js'];
+    const stamps = {};
+    setInterval(async () => {
+      for (const f of watch) {
+        try {
+          const r = await fetch(f, { method: 'HEAD', cache: 'no-store' });
+          const m = r.headers.get('Last-Modified');
+          if (stamps[f] && m && m !== stamps[f]) app.src = src;
+          stamps[f] = m;
+        } catch {}
+      }
+    }, 1000);
+  }
+</script>
+</body>
+</html>

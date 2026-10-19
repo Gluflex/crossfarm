@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crossfarm: your field's 2040s climate already exists somewhere</title>
+<meta name="description" content="Crossfarm finds where in Europe a field's future climate exists today, and puts farmers in touch with the people who farm it.">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  /* Same field-instrument identity as the app: map-paper neutrals, one signal orange, hairlines */
+  :root {
+    --bg: #eef0ec; --surface: #f8f9f6; --ink: #161a17; --ink-2: #434a45; --muted: #6a726c;
+    --line: rgba(22, 26, 23, .13); --accent: #d4501a; --up: #3b7a45;
+    --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; background: var(--bg); }
+  body { margin: 0; color: var(--ink); font: 400 18px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  h1, h2, p, ul { margin: 0; }
+  a { color: var(--accent); font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+  .slide { min-height: 100vh; scroll-snap-align: start; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    gap: 5vw; align-items: center; padding: 8vh 7vw; border-bottom: 1px solid var(--line); position: relative; }
+  .slide.text { grid-template-columns: minmax(0, 1fr); }
+  .copy { max-width: 40rem; }
+  h1, h2 { font-weight: 760; font-stretch: 122%; letter-spacing: -.025em; line-height: 1.02; }
+  h1 { font-size: clamp(40px, 5.6vw, 88px); max-width: 15ch; }
+  h2 { font-size: clamp(32px, 3.9vw, 60px); max-width: 18ch; }
+  .lead { font-size: clamp(19px, 1.5vw, 23px); color: var(--ink-2); margin-top: 1.4rem; max-width: 34rem; }
+  .copy ul { list-style: none; padding: 0; margin-top: 1.6rem; }
+  .copy li { padding: .7rem 0; border-top: 1px solid var(--line); color: var(--ink-2); max-width: 36rem; }
+  .copy li b { color: var(--ink); font-weight: 650; }
+  .note { font-size: 14px; color: var(--muted); margin-top: 1.4rem; max-width: 34rem; }
+  .by { margin-top: 2.6rem; font-size: 15px; color: var(--muted); }
+  .by b { color: var(--ink); font-weight: 650; }
+
+  .phones { display: flex; gap: 1.6vw; justify-content: center; align-items: flex-start; }
+  .phones figure { margin: 0; }
+  .phone { display: block; width: min(300px, 24vw); height: auto; aspect-ratio: 390 / 844; object-fit: cover; object-position: top;
+    border-radius: 26px; border: 1px solid var(--line); background: var(--surface); }
+  .phones.three .phone { width: min(250px, 18vw); }
+  .phones figcaption { font-size: 14px; color: var(--muted); margin-top: .7rem; max-width: min(250px, 18vw); }
+
+  /* Seeland, today against the 2040s: the app's dumbbell, at slide scale */
+  .shift { margin-top: 3rem; display: grid; gap: 3.4rem; max-width: 36rem; }
+  .row { display: grid; grid-template-columns: 11rem 1fr; align-items: center; gap: 1.2rem; }
+  .row span { font-size: 15px; color: var(--ink-2); }
+  .db { position: relative; height: 22px; }
+  .db i { position: absolute; top: 50%; transform: translateY(-50%); }
+  .db .ax { left: 0; right: 0; height: 1px; background: var(--line); }
+  .db .seg { height: 3px; background: var(--accent); }
+  .db .d0, .db .d1 { width: 14px; height: 14px; border-radius: 50%; margin-left: -7px; }
+  .db .d0 { border: 2px solid var(--muted); background: var(--bg); }
+  .db .d1 { background: var(--accent); }
+  .db em { position: absolute; top: -1.35rem; font-style: normal; font-size: 13px; font-weight: 650; transform: translateX(-50%); white-space: nowrap; }
+  .db em.a { color: var(--muted); }
+  .db em.b { top: auto; bottom: -1.45rem; color: var(--ink); font-weight: 500; transform: translateX(-78%); }
+  .db .tick { width: 2px; height: 14px; background: var(--ink); margin-left: -1px; }
+
+  /* Back-test: three shares, read as a table */
+  .score { margin-top: 2rem; border-collapse: collapse; max-width: 34rem; width: 100%; }
+  .score td { padding: .75rem 0; border-top: 1px solid var(--line); vertical-align: baseline; }
+  .score td:first-child { width: 6.5rem; font-weight: 760; font-stretch: 122%; font-size: 34px; letter-spacing: -.02em; }
+  .score tr:first-child td:first-child { color: var(--accent); }
+  .score td:last-child { color: var(--ink-2); }
+
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3vw; margin-top: 2.6rem; }
+  .cols div { border-top: 2px solid var(--ink); padding-top: 1rem; color: var(--ink-2); font-size: 17px; }
+  .cols div b { display: block; color: var(--ink); font-weight: 680; font-size: 19px; margin-bottom: .4rem; }
+  .cols div.us { border-color: var(--accent); }
+
+  .count { position: fixed; right: 2.2vw; bottom: 2vh; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mark { position: absolute; left: 7vw; bottom: 3.5vh; display: flex; align-items: center; gap: 8px; font-weight: 700; font-stretch: 118%; font-size: 15px; }
+  .mark svg { width: 22px; height: 22px; }
+
+  @media (max-width: 860px) {
+    .slide { grid-template-columns: 1fr; padding: 9vh 6vw 12vh; }
+    .phone, .phones.three .phone { width: min(260px, 60vw); }
+    .phones.three { flex-wrap: wrap; }
+    .phones figcaption { max-width: min(260px, 60vw); }
+    .cols { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr; gap: 1.6rem; }
+    html { scroll-snap-type: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @page { size: 338mm 190mm; margin: 0; }
+  @media print {
+    html { scroll-snap-type: none; }
+    .slide { min-height: 190mm; height: 190mm; break-after: page; border: 0; }
+    .count { display: none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="8" fill="#d4501a"/>
+    <path d="M9 23 23 9M9 9l14 14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M17.5 9H23v5.5M14.5 23H9v-5.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<main>
+<section class="slide" aria-label="Slide 1">
+  <div class="copy">
+    <h1>Your field's 2040s climate already exists somewhere.</h1>
+    <p class="lead">Crossfarm finds where, and puts farmers in touch with the people who farm that climate today.</p>
+    <p class="by"><b>Leandro Catarci</b>, ETH Zurich, on exchange at TU Delft. Try it: <a href="./">crossfarm.pages.dev</a></p>
+  </div>
+  <div class="phones"><img class="phone" src="pitch/match.jpg" alt="Crossfarm map: where a Swiss field's +2 °C climate exists today, with Banja Luka, Asnières-sur-Saône and Friesenheim as the closest matches" width="390" height="844"></div>
+  <div class="mark"><svg viewBox="0 0 32 32"><use href="#logo"/></svg>Crossfarm</div>
+</section>
+
+<section class="slide" aria-label="Slide 2">
+  <div class="copy">
+    <h2>A farm in Seeland, Switzerland, is heading for the summers of Banja Luka.</h2>
+    <div class="shift" role="img" aria-label="Seeland today against the 2040s: summer days 24.0 to 26.1 °C, Banja Luka today 27.2 °C; days over 30 °C from 3 to 11">
+      <div class="row"><span>Summer days, °C</span>
+        <div class="db"><i class="ax"></i><i class="seg" style="left:33%;width:35%"></i><i class="tick" style="left:87%"></i><i class="d0" style="left:33%"></i><i class="d1" style="left:68%"></i>
+          <em class="a" style="left:33%">24.0 today</em><em style="left:68%">26.1 at +2 °C</em><em class="b" style="left:87%">27.2 in Banja Luka today</em></div></div>
+      <div class="row"><span>Days over 30 °C</span>
+        <div class="db"><i class="ax"></i><i class="seg" style="left:15%;width:40%"></i><i class="d0" style="left:15%"></i><i class="d1" style="left:55%"></i>
+          <em class="a" style="left:15%">3 today</em><em style="left:55%">11 in the 2040s</em></div></div>
+    </div>
+    <p class="lead">Nobody around this farm has worked that climate. Farmers 806&nbsp;km east have, for decades.</p>
+    <p class="note">Summer days and the match: TerraClimate 1991 to 2020 plus the CMIP6 ensemble change at +2 °C of global warming. Days over 30 °C: one climate model (EC-Earth3P-HR), 2035 to 2049 against 1991 to 2020. Hof im Grossen Moos, a Crossfarm demo farm.</p>
+  </div>
+  <div class="phones"><img class="phone" src="pitch/farm.jpg" alt="Crossfarm farm screen for Hof im Grossen Moos, Seeland: +1.4 °C by the 2040s, summer rain down 8 percent, days over 30 °C from 3 to 11" width="390" height="844"></div>
+</section>
+
+<section class="slide text" aria-label="Slide 3">
+  <div class="copy" style="max-width:none">
+    <h2>Maps already say what will grow. They do not say who has done it.</h2>
+    <div class="cols">
+      <div><b>FAO GAEZ v5</b>Crop suitability under future climate, worldwide, at 1&nbsp;km, across climate models.</div>
+      <div><b>ClimAurea</b>Horizon Europe project, 2026 to 2029, bringing that suitability to field level.</div>
+      <div class="us"><b>Crossfarm</b>The step after the map: the farmers who already work your future climate, and a way to ask them.</div>
+    </div>
+    <p class="lead" style="max-width:46rem;margin-top:2.6rem">Farmers change practice when other farmers show them how (Wood et al. 2014). Without that step, climate information stays "useful but not usable" (Lemos et al. 2012).</p>
+  </div>
+</section>
+
+<section class="slide" aria-label="Slide 4" style="grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr)">
+  <div class="copy">
+    <h2>Pick a field. See where its climate is today. Ask the farmers there.</h2>
+    <p class="lead">Any point in Europe and around the Mediterranean, compared with 23,120 places on a 25&nbsp;km grid.</p>
+  </div>
+  <div class="phones three">
+    <figure><img class="phone" src="pitch/farm.jpg" alt="Field screen" width="390" height="844"><figcaption>Climate, soil, satellite greenness and 17 crops for your field.</figcaption></figure>
+    <figure><img class="phone" src="pitch/match.jpg" alt="Climate match map" width="390" height="844"><figcaption>Where your +2 °C climate is today, side by side.</figcaption></figure>
+    <figure><img class="phone" src="pitch/feed.jpg" alt="Community sorted by climate distance" width="390" height="844"><figcaption>Questions sorted by climate, not by distance.</figcaption></figure>
+  </div>
+</section>
+
+<section class="slide" aria-label="Slide 5">
+  <div class="copy">
+    <h2>The assistant reads the field, not the internet.</h2>
+    <ul>
+      <li><b>Ask Crossfarm</b> runs NVIDIA Nemotron with six tools over this field's climate, soil, satellite and crop data and the farmers in its future climate.</li>
+      <li><b>Every number in an answer is checked</b> against that data. An answer with a number the data does not contain is shown with a warning.</li>
+      <li><b>Translation</b> lets a farmer in Seeland read an answer written in Banja Luka.</li>
+      <li><b>Next:</b> learn from answered questions which matches helped, and send each new question to the farmers most likely to answer it well.</li>
+    </ul>
+  </div>
+  <div class="phones"><img class="phone" src="pitch/ask.jpg" alt="Ask Crossfarm sheet with questions suggested from the field's own data" width="390" height="844"></div>
+</section>
+
+<section class="slide" aria-label="Slide 6">
+  <div class="copy">
+    <h2>Checked against the past, and honest about the result.</h2>
+    <table class="score">
+      <tr><td>62%</td><td>of 913 places in Europe: the method's predicted direction matches where their climate actually moved, 1961 to 1990 against 1991 to 2020</td></tr>
+      <tr><td>58%</td><td>a plain "same warming everywhere" guess</td></tr>
+      <tr><td>25%</td><td>a random direction</td></tr>
+    </table>
+    <p class="lead">It confirms the direction, not the exact place. Whether the matched farmers give useful answers is what the pilot tests.</p>
+    <p class="note">Back-test on TerraClimate normals with the app's own matching code. Method, limits and sources are in the app.</p>
+  </div>
+  <div class="phones"><img class="phone" src="pitch/method.jpg" alt="Method sheet in the app with the back-test result" width="390" height="844"></div>
+</section>
+
+<section class="slide text" aria-label="Slide 7">
+  <div class="copy" style="max-width:52rem">
+    <h2>Built since 11 October. No farmers using it yet.</h2>
+    <ul>
+      <li><b>Live web app</b> for any field in Europe, installable on a phone, works offline once loaded.</li>
+      <li><b>Per field:</b> Sentinel-2 imagery, ISRIC soil, CMIP6 climate to 2049, MODIS greenness since 2001, 17 crops scored for today and the 2040s.</li>
+      <li><b>Climate matching</b> after Mahony et al. 2017, with a second climate model as cross-check.</li>
+      <li><b>Shared community</b> with translation, reporting and a pilot sign-up. The example threads are labelled as fictional.</li>
+      <li><b>Open source</b> under AGPL-3.0.</li>
+    </ul>
+    <p class="lead">Started at a hackathon in Wageningen with a team of five from the Netherlands, Italy, Spain, Ireland and Switzerland.</p>
+  </div>
+</section>
+
+<section class="slide text" aria-label="Slide 8">
+  <div class="copy" style="max-width:none">
+    <h2>Who pays: three guesses to test.</h2>
+    <div class="cols">
+      <div><b>Cooperatives and advisory services</b>Peer matching for their members, priced per member farm. Farmers use it free.</div>
+      <div><b>Seed and nursery companies</b>Where their varieties will be needed in 2040, and which growers already know them.</div>
+      <div><b>Crop insurers</b>Which regions shift first, and what farmers there changed.</div>
+    </div>
+    <p class="lead" style="margin-top:2.6rem">None of these is validated yet.</p>
+  </div>
+</section>
+
+<section class="slide text" aria-label="Slide 9">
+  <div class="copy" style="max-width:52rem">
+    <h2>Climate does not stop at borders. Neither do the matches.</h2>
+    <ul>
+      <li><b>Seeland, Switzerland</b> matches Banja Luka in Bosnia and Herzegovina, Asnières-sur-Saône in France and Friesenheim in Germany.</li>
+      <li><b>Gelderland, the Netherlands</b> matches places in Saxony and in south-west France.</li>
+      <li><b>Built on European data</b>: Copernicus Sentinel-2 imagery, the EU's own climate adaptation agenda, farmers who speak different languages.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide text" aria-label="Slide 10">
+  <div class="copy" style="max-width:52rem">
+    <div data-for="default">
+      <h2>What happens next.</h2>
+      <ul>
+        <li><b>Farmer interviews</b> in matched regions, starting in Switzerland, the Netherlands and the Balkans.</li>
+        <li><b>The first matched conversations</b>, measured: did the answer change a decision?</li>
+        <li><b>One partner who would pay</b>, from the three guesses before.</li>
+      </ul>
+    </div>
+    <div data-for="lab" hidden>
+      <h2>What I want from the Lab week.</h2>
+      <ul>
+        <li><b>Ten or more farmer interviews</b> in matched regions before Demo Day.</li>
+        <li><b>The first matched conversations</b>, measured: did the answer change a decision?</li>
+        <li><b>One partner who would pay</b>, from the three guesses before.</li>
+      </ul>
+    </div>
+    <p class="by"><b>Leandro Catarci</b>, <a href="mailto:leandro@catarci.ch">leandro@catarci.ch</a>, <a href="./">crossfarm.pages.dev</a></p>
+  </div>
+</section>
+</main>
+<p class="count" id="count" aria-hidden="true">1 / 10</p>
+
+<script>
+  // Arrow keys, space and page keys move one slide; the counter follows the slide in view
+  // ?for=lab shows the AI Entrepreneurs Lab version of the last slide
+  const audience = new URLSearchParams(location.search).get('for') || 'default';
+  document.querySelectorAll('[data-for]').forEach((el) => (el.hidden = el.dataset.for !== (document.querySelector(`[data-for="${audience}"]`) ? audience : 'default')));
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { cur = slides.indexOf(e.target); document.getElementById('count').textContent = `${cur + 1} / ${slides.length}`; }
+  }), { threshold: 0.55 });
+  slides.forEach((s) => io.observe(s));
+  addEventListener('keydown', (e) => {
+    const step = { ArrowDown: 1, ArrowRight: 1, PageDown: 1, ' ': 1, ArrowUp: -1, ArrowLeft: -1, PageUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    slides[Math.max(0, Math.min(slides.length - 1, cur + step))].scrollIntoView();
+  });
+</script>
+</body>
+</html>

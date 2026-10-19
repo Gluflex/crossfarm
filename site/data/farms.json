@@ -1,0 +1,12 @@
+[
+  { "id": "gelderland", "name": "Hoeve de Kraats", "region": "Gelderland", "country": "Netherlands", "cc": "NL",
+    "lat": 51.99, "lon": 5.75, "ha": 64, "family": "potato", "since": 1932 },
+  { "id": "foggia", "name": "Masseria San Lorenzo", "region": "Puglia", "country": "Italy", "cc": "IT",
+    "lat": 41.50, "lon": 15.60, "ha": 120, "family": "durum", "since": 1951 },
+  { "id": "cordoba", "name": "Cortijo El Alamillo", "region": "Andalusia", "country": "Spain", "cc": "ES",
+    "lat": 37.80, "lon": -4.95, "ha": 210, "family": "wheat", "since": 1964 },
+  { "id": "tipperary", "name": "Glenbrook Farm", "region": "Co. Tipperary", "country": "Ireland", "cc": "IE",
+    "lat": 52.48, "lon": -7.85, "ha": 48, "family": "grass", "since": 1908 },
+  { "id": "seeland", "name": "Hof im Grossen Moos", "region": "Seeland, Bern", "country": "Switzerland", "cc": "CH",
+    "lat": 47.00, "lon": 7.15, "ha": 35, "family": "sugarbeet", "since": 1946 }
+]

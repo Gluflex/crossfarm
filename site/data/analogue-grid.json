@@ -1,0 +1,129 @@
+{
+ "source": "TerraClimate v1.1 1991-2020 normals and +2 C pseudo-climate (Abatzoglou et al. 2018); ISRIC SoilGrids 2.0 topsoil 0-30 cm",
+ "north": 72.0,
+ "west": -25.0,
+ "step": 0.25,
+ "rows": 168,
+ "cols": 280,
+ "cells": 23120,
+ "fields": [
+  [
+   "tmax_djf",
+   10
+  ],
+  [
+   "tmax_mam",
+   10
+  ],
+  [
+   "tmax_jja",
+   10
+  ],
+  [
+   "tmax_son",
+   10
+  ],
+  [
+   "tmin_djf",
+   10
+  ],
+  [
+   "tmin_mam",
+   10
+  ],
+  [
+   "tmin_jja",
+   10
+  ],
+  [
+   "tmin_son",
+   10
+  ],
+  [
+   "ppt_djf",
+   1
+  ],
+  [
+   "ppt_mam",
+   1
+  ],
+  [
+   "ppt_jja",
+   1
+  ],
+  [
+   "ppt_son",
+   1
+  ],
+  [
+   "tmax_djf_2c",
+   10
+  ],
+  [
+   "tmax_mam_2c",
+   10
+  ],
+  [
+   "tmax_jja_2c",
+   10
+  ],
+  [
+   "tmax_son_2c",
+   10
+  ],
+  [
+   "tmin_djf_2c",
+   10
+  ],
+  [
+   "tmin_mam_2c",
+   10
+  ],
+  [
+   "tmin_jja_2c",
+   10
+  ],
+  [
+   "tmin_son_2c",
+   10
+  ],
+  [
+   "ppt_djf_2c",
+   1
+  ],
+  [
+   "ppt_mam_2c",
+   1
+  ],
+  [
+   "ppt_jja_2c",
+   1
+  ],
+  [
+   "ppt_son_2c",
+   1
+  ],
+  [
+   "def",
+   1
+  ],
+  [
+   "def_2c",
+   1
+  ],
+  [
+   "ph",
+   10
+  ],
+  [
+   "clay",
+   1
+  ],
+  [
+   "sand",
+   1
+  ]
+ ],
+ "missing": -32768,
+ "layout": "little-endian: uint16 cell index (row * cols + col, row 0 at the north edge) x cells, then int16 values cell by cell"
+}

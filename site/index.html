@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  // Computers (wide, with a mouse) see the app inside a phone frame. ?frame=0 shows it bare.
+  if (window.top === window.self && !new URLSearchParams(location.search).has('frame')
+      && matchMedia('(min-width: 700px) and (hover: hover) and (pointer: fine)').matches
+      && !matchMedia('(display-mode: standalone)').matches) {
+    const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+    location.replace((local ? 'phone.html' : 'phone') + location.search);
+  }
+  if (window.top !== window.self) document.documentElement.classList.add('framed');
+</script>
+<title>Crossfarm</title>
+<meta name="description" content="Your field's 2040s climate already exists somewhere. Crossfarm finds where, and puts you in touch with the farmers who farm it today.">
+<meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111412" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="root">
+
+  <!-- Welcome: choose a farm -->
+  <section id="onboard" class="screen">
+    <div class="scroll">
+      <div class="cover" id="cover">
+        <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#logo"/></svg>Crossfarm</div>
+        <div class="credit">Foggia plain, Sentinel-2</div>
+      </div>
+      <div class="intro">
+        <h1>Your field's 2040s climate already exists somewhere.</h1>
+        <p>Crossfarm finds where, and puts you in touch with the farmers who farm it today.</p>
+      </div>
+      <div class="label">Demo farms</div>
+      <div class="farms" id="farmList"></div>
+      <div class="label">Your own field</div>
+      <div class="own">
+        <button class="btn primary" id="pickMap"><i class="ph ph-map-trifold"></i>Pick on map</button>
+        <button class="btn line" id="locate"><i class="ph ph-crosshair"></i>My location</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map picker -->
+  <section id="picker" class="screen">
+    <div id="pickmap"></div>
+    <i class="ph-fill ph-map-pin pick-pin"></i>
+    <div class="pick-top">
+      <button class="icon-btn" id="pickBack" aria-label="Back"><i class="ph ph-arrow-left"></i></button>
+      <input id="search" placeholder="Search a village or region" autocomplete="off" aria-label="Search a place">
+    </div>
+    <div class="results" id="results" hidden></div>
+    <div class="pick-card">
+      <h3 id="pickPlace">Move the map to your field</h3>
+      <p id="pickCoord">Zoom in until you see your own parcels.</p>
+      <div class="row2">
+        <label class="field"><small>Farm name</small><input id="pickName" placeholder="My farm"></label>
+        <label class="field"><small>Hectares</small><input id="pickHa" type="number" inputmode="numeric" value="40"></label>
+      </div>
+      <label class="field"><small>What has your family always grown?</small><select id="pickFamily"></select></label>
+      <button class="btn primary block" id="pickGo" style="margin-top:14px">Analyse this field</button>
+    </div>
+  </section>
+
+  <!-- Scan -->
+  <section id="scan" class="screen">
+    <div class="band" id="scanBand"><span class="pin"></span></div>
+    <div class="scan-body">
+      <h2 id="scanTitle">Reading your land</h2>
+      <p class="sub" id="scanSub"></p>
+      <ul class="steps" id="steps"></ul>
+    </div>
+  </section>
+
+  <!-- App -->
+  <main id="main" class="screen">
+    <div class="tab" data-tab="farm"><div class="scroll" id="tFarm"></div></div>
+    <div class="tab" data-tab="climate"><div class="scroll" id="tClimate"></div></div>
+    <div class="tab" data-tab="crops"><div class="scroll" id="tCrops"></div></div>
+    <div class="tab" data-tab="community"><div class="scroll" id="tCommunity"></div></div>
+  </main>
+  <nav class="tabbar" id="tabbar">
+    <button data-go="farm"><i class="ph ph-barn"></i>Farm</button>
+    <button data-go="climate"><i class="ph ph-thermometer-simple"></i>Climate</button>
+    <button data-go="crops"><i class="ph ph-plant"></i>Crops</button>
+    <button data-go="community"><i class="ph ph-chats-circle"></i>Community</button>
+  </nav>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="scroll" id="sheetBody"></div><div id="sheetFoot"></div></div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<!-- Brand mark from the team poster: the crossed arrows -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="logo" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="8" fill="#d4501a"/>
+    <path d="M9 23 23 9M9 9l14 14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M17.5 9H23v5.5M14.5 23H9v-5.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="js/app.js"></script>
+<script>
+  // Offline support online only; localhost previews must never come from cache
+  if ('serviceWorker' in navigator && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>

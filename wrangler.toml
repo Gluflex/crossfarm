@@ -1,0 +1,26 @@
+# Cloudflare Pages project "crossfarm": static app in site/, API in functions/.
+name = "crossfarm"
+pages_build_output_dir = "site"
+compatibility_date = "2026-10-01"
+
+# Community posts, pilot sign-ups, assistant spend counters and answer cache.
+# database_id: replace with the id printed by `npx wrangler d1 create crossfarm`.
+[[d1_databases]]
+binding = "DB"
+database_name = "crossfarm"
+database_id = "ab99ed9e-4b1e-490b-981f-b6bc74927646"
+
+# Assistant spend guard. The assistant is OFF unless AI_ENABLED is "1".
+# Secrets (never in this file): NEBIUS_API_KEY, IP_SALT. Without IP_SALT every write and question is refused.
+#   npx wrangler pages secret put NEBIUS_API_KEY --project-name crossfarm
+[vars]
+AI_ENABLED = "1"
+AI_TOKENS_TOTAL = "1500000"
+AI_TOKENS_DAY = "250000"
+AI_TOKENS_IP_DAY = "60000"
+AI_CALLS_IP_DAY = "40"
+AI_QUESTION_MS = "40000"
+AI_MAX_TOKENS = "600"
+AI_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
+AI_MODEL = "nvidia/nemotron-3-super-120b-a12b"
+AI_MODEL_FAST = "nvidia/nemotron-3-super-120b-a12b"
