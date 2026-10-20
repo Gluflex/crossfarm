@@ -1100,7 +1100,7 @@ async function runAI() {
   } else {
     out.innerHTML = `<div class="ai-ans">
       <p class="ai-text">${esc(plain(r.answer))}</p>
-      ${r.used?.length ? `<div class="used">${ph('database')}<span>Used: ${r.used.map((u) => esc(TOOL_LABEL[u] || u)).join(', ')}</span></div>` : ''}
+      ${r.used?.length ? `<div class="used">${ph('database')}<span>Used: ${r.used.map((u) => esc(TOOL_LABEL[u] || u)).join(', ')}${r.rounds > 1 ? ` (${r.rounds} rounds)` : ''}</span></div>` : ''}
       ${r.numbers === 'unverified' ? `<p class="caveat warn">${ph('warning')}<span>Some numbers in this answer are not in your field data. Check them in the tabs before acting.</span></p>` : ''}
       <p class="caveat">${ph('info')}<span>Model output (NVIDIA Nemotron via Nebius). Crop scores are a screening, not a forecast.</span></p>
     </div>${handoff}`;

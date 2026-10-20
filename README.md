@@ -128,9 +128,13 @@ endpoint (`AI_BASE_URL`, model `AI_MODEL`, default
 `nvidia/nemotron-3-super-120b-a12b`) with function calling: the model decides
 which of the six tools it needs, Crossfarm runs them on the field's data and
 returns the results, and the model writes a short answer in the farmer's own
-language. A second model setting (`AI_MODEL_FAST`) is used for translating
-farmer posts. Token Factory made this possible without running any GPU
-ourselves; the whole backend is a few plain JS files.
+language. The answer shows which tools were used and how many model rounds
+it took. A second model setting (`AI_MODEL_FAST`) is used for translating
+farmer posts, with reasoning switched off (`chat_template_kwargs.enable_thinking`);
+both settings currently point at Nemotron 3 Super, and `AI_MODEL_FAST` exists so
+translation can move to Nemotron 3 Nano without a code change. Token Factory
+made this possible without running any GPU ourselves; the whole backend is a
+few plain JS files.
 
 ### Spend guard
 

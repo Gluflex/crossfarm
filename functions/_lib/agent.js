@@ -31,8 +31,8 @@ Rules:
 - If the data cannot answer the question, say so plainly. Never guess yields, prices or dates.
 - Describe only changes the tool results show (warmer, drier, more hot days). If you did not fetch the climate, do not describe it.
 - Crop scores are a screening from climate and soil, not a forecast.
-- End with whom to ask: name a future-climate place or a matching farmer discussion from the tools when there is one.
-- Discussions with "demo": true are fictional examples. If you mention one, say it is a demo thread.`;
+- End with whom to ask: name the future-climate place (region and country) from the tools where farmers already work this field's future climate.
+- Discussions with "demo": true are fictional examples: do not recommend asking the people in them. You may quote what such a thread discusses, saying it is a demo thread. Recommend a person only from a discussion without "demo".`;
 
 const norm = (s) => String(s || '').toLowerCase();
 
@@ -115,7 +115,8 @@ export async function ask(env, db, ip, question, field) {
     if (!calls.length) {
       const answer = demoNote(clean(r.message.content), field);
       if (!answer) return { paused: 'empty' };
-      return { answer, used, numbers: ungrounded(answer, texts).length ? 'unverified' : 'ok', cut: r.finish === 'length' };
+      // rounds: model calls for this question, tool rounds plus the answering one
+      return { answer, used, rounds: round + 1, numbers: ungrounded(answer, texts).length ? 'unverified' : 'ok', cut: r.finish === 'length' };
     }
     // only the calls that get an answer go back into the conversation
     messages.push({ role: 'assistant', content: r.message.content || '', tool_calls: calls });

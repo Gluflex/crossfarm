@@ -92,6 +92,7 @@ if (run('ask')) {
   ok(a.status === 200 && typeof a.data?.answer === 'string' && a.data.answer.length > 0, 'POST /api/ask returns an answer');
   ok(Array.isArray(a.data?.used) && a.data.used.length >= 1, `answer used at least one tool (${a.data?.used})`);
   ok(['ok', 'unverified'].includes(a.data?.numbers), 'answer carries a number check');
+  ok(Number.isInteger(a.data?.rounds) && a.data.rounds >= 2, `answer reports its model rounds (${a.data?.rounds})`);
   ok((await call('/api/ask', { question: '', field }, uniq())).status === 400, 'empty question is 400');
   const tr = await call('/api/translate', { text: 'x'.repeat(2001), to: 'de' }, uniq());
   ok(tr.status === 400, 'translate over 2,000 characters is 400');

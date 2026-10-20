@@ -158,18 +158,33 @@ export async function fetchNdvi(lat, lon) {
 
 // Place names for a tapped point (BigDataCloud client endpoint: free, no key)
 // Cached per point; one retry, because several parallel lookups sometimes fail together.
+// Labels as people say them: no "[Cymru GB-CYM]" style codes, short country names
+const SHORT_COUNTRY = {
+  'United Kingdom of Great Britain and Northern Ireland': 'United Kingdom',
+  'Russian Federation': 'Russia',
+  'Republic of Moldova': 'Moldova',
+  'Republic of North Macedonia': 'North Macedonia',
+  'Netherlands (Kingdom of the)': 'Netherlands',
+  'Czechia': 'Czech Republic',
+  'Syrian Arab Republic': 'Syria',
+  'Iran (Islamic Republic of)': 'Iran',
+};
+const tidy = (s) => String(s || '').replace(/\s*\[[^\]]*\]/g, '').replace(/\s*\([^)]*\)/g, '').trim();
+const shortCountry = (s) => SHORT_COUNTRY[s] || tidy(s);
+
 export async function reverseGeocode(lat, lon) {
-  const k = `cf:geo1:${(+lat).toFixed(2)},${(+lon).toFixed(2)}`;
+  const k = `cf:geo2:${(+lat).toFixed(2)},${(+lon).toFixed(2)}`;
   const hit = cached(k);
   if (hit) return hit;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       if (attempt) await new Promise((r) => setTimeout(r, 800 + Math.random() * 700));
       const j = await getJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`, 8000);
+      const locality = tidy(j.locality || j.city), sub = tidy(j.principalSubdivision);
       const v = {
-        region: j.locality || j.city || j.principalSubdivision || 'Your area',
-        sub: j.principalSubdivision && j.principalSubdivision !== (j.locality || j.city) ? j.principalSubdivision : '',
-        country: j.countryName || '',
+        region: locality || sub || 'Your area',
+        sub: sub && sub !== locality ? sub : '',
+        country: shortCountry(j.countryName),
         cc: j.countryCode || '',
       };
       if (v.region !== 'Your area') store(k, v);
